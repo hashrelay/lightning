@@ -241,3 +241,75 @@ class PostgresDbProvider(object):
         self.proc.wait()
         shutil.rmtree(self.pgdir)
         drop_unused_port(self.port)
+
+
+class CockroachDbProvider(object):
+    def __init__(self, directory):
+        self.directory = directory
+        self.port = None
+        self.proc = None
+        print("Starting CockroachDbProvider")
+
+    def locate_path(self):
+        cockroach = shutil.which('cockroach')
+        if not cockroach:
+            raise ValueError("Could not find 'cockroach' binary. Is CockroachDB installed?")
+
+        if os.path.isfile(cockroach):
+            if os.access(cockroach, os.X_OK):
+                logging.info("Found `cockroach`")
+                return cockroach
+
+        raise ValueError("Could not find `cockroach` binary")
+
+    def start(self):
+        for i in itertools.count():
+            self.corkroach_dir = os.path.join(self.directory, 'cockroachdb-{}'.format(i))
+            if not os.path.exists(self.cockroach_dir):
+                break
+
+        cockroach = self.locate_path()
+        self.port = reserve_unused_port()
+        self.proc = subprocess.Popen([
+            cockroach,
+            'start-single-node',
+            '--store', self.cockroach_dir,
+            '--listen-addr localhost:{}'.format(self.port),
+            '--insecure',
+        ])
+        for i in range(30):
+            try:
+                self.conn = psycopg2.connect("dbname=defaultdb user=postgres host=localhost port={}".format(self.port))
+                break
+            except Exception:
+                time.sleep(0.5)
+
+
+    def get_db(self, node_directory, testname, node_id):
+        # Random suffix to avoid collisions on repeated tests
+        nonce = ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(8))
+        dbname = "{}_{}_{}".format(testname, node_id, nonce)
+
+        cur = self.conn.cursor()
+        cur.execute("CREATE DATABASE {};".format(dbname))
+        cur.close()
+        db = PostgresDb(dbname, self.port)
+        return db
+
+    def stop(self):
+        # Send fast shutdown signal see [1] for details:
+        #
+        # SIGINT
+        #
+        # This is the Fast Shutdown mode. The server disallows new connections
+        # and sends all existing server processes SIGTERM, which will cause
+        # them to abort their current transactions and exit promptly. It then
+        # waits for all server processes to exit and finally shuts down. If
+        # the server is in online backup mode, backup mode will be terminated,
+        # rendering the backup useless.
+        #
+        # [1] https://www.postgresql.org/docs/9.1/server-shutdown.html
+        self.proc.send_signal(signal.SIGINT)
+        self.proc.wait()
+        shutil.rmtree(self.pgdir)
+        drop_unused_port(self.port)

@@ -333,7 +333,7 @@ def test_optimistic_locking(node_factory, bitcoind):
     assert(l1.daemon.is_in_log(r'Optimistic lock on the database failed'))
 
 
-@unittest.skipIf(os.environ.get('TEST_DB_PROVIDER', None) != 'postgres', "Only applicable to postgres")
+@unittest.skipIf(os.environ.get('TEST_DB_PROVIDER', None) == 'sqlite3', "Only applicable to postgres/cockroach")
 def test_psql_key_value_dsn(node_factory, db_provider, monkeypatch):
     from pyln.testing.db import PostgresDb
 
