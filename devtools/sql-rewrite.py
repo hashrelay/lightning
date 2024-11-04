@@ -83,9 +83,36 @@ class PostgresRewriter(Rewriter):
         return query
 
 
+class CockroachRewriter(Rewriter):
+    def rewrite_single(self, q):
+        # Replace DB specific queries with a no-op
+        if "/*SQLITE*/" in q:
+            return "UPDATE vars SET intval=1 WHERE name='doesnotexist'"  # Return a no-op
+
+        # Let's start by replacing any eventual '?' placeholders
+        q2 = ""
+        count = 1
+        for c in q:
+            if c == '?':
+                c = "${}".format(count)
+                count += 1
+            q2 += c
+        query = q2
+
+        typemapping = {
+            r'BLOB': 'BYTES',
+            r'_ROWID_': 'unique_rowid()',
+            r'CURRENT_TIMESTAMP\(\)': "TIMESTAMP",
+        }
+
+        query = self.rewrite_types(query, typemapping)
+        return query
+
+
 rewriters = {
     "sqlite3": Sqlite3Rewriter(),
     "postgres": PostgresRewriter(),
+    "cockroach": CockroachRewriter(),
 }
 
 
