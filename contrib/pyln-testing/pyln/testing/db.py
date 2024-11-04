@@ -284,7 +284,6 @@ class CockroachDbProvider(object):
             except Exception:
                 time.sleep(0.5)
 
-
     def get_db(self, node_directory, testname, node_id):
         # Random suffix to avoid collisions on repeated tests
         nonce = ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(8))
