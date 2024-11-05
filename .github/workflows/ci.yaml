@@ -58,19 +58,13 @@ jobs:
           # We're going to check BOLT quotes, so get the latest version
           git clone https://github.com/lightning/bolts.git ../${BOLTDIR}
       - name: Configure
-        run: |
-          . "$HOME/.cargo/env"
-          ./configure --enable-debugbuild --enable-rust
+        run: ./configure --enable-debugbuild --enable-rust
       - name: Check source
-        run: |
-          . "$HOME/.cargo/env"
-          make check-source BASE_REF="origin/${{ github.base_ref }}"
+        run: make check-source BASE_REF="origin/${{ github.base_ref }}"
       - name: Check Generated Files have been updated
         run: make check-gen-updated
       - name: Check docs
-        run: |
-          . "$HOME/.cargo/env"
-          make check-doc
+        run: make check-doc
 
   compile:
     name: Compile CLN ${{ matrix.cfg }}
@@ -218,6 +212,13 @@ jobs:
         env:
           TEST_NETWORK: ${{ matrix.TEST_NETWORK }}
         run: .github/scripts/install-bitcoind.sh
+
+      - name: Install CockroachDB
+        if: ${{ matrix.TEST_DB_PROVIDER == 'cockroach' }}
+        run: |
+          wget -q https://binaries.cockroachdb.com/cockroach-v24.2.4.linux-amd64.tgz
+          tar -xvzf cockroach-v24.2.4.linux-amd64.tgz
+          cp cockroach-*/cockroach /usr/local/bin/
 
       - name: Download build
         uses: actions/download-artifact@v4
