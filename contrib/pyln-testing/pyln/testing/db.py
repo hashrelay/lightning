@@ -264,7 +264,7 @@ class CockroachDbProvider(object):
 
     def start(self):
         for i in itertools.count():
-            self.corkroach_dir = os.path.join(self.directory, 'cockroachdb-{}'.format(i))
+            self.cockroach_dir = os.path.join(self.directory, 'cockroachdb-{}'.format(i))
             if not os.path.exists(self.cockroach_dir):
                 break
 
