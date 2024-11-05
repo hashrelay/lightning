@@ -254,7 +254,7 @@ jobs:
         run: |
           env
           cat config.vars
-          VALGRIND=0 poetry run pytest tests/ -vvv -n ${PYTEST_PAR} ${PYTEST_OPTS}
+          VALGRIND=0 poetry -vvv run pytest tests/ -n ${PYTEST_PAR} ${PYTEST_OPTS}
 
   gather:
     # A dummy task that depends on the full matrix of tests, and
