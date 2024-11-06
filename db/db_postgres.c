@@ -183,7 +183,7 @@ static u64 db_postgres_column_u64(struct db_stmt *stmt, int col)
 static s64 db_postgres_column_int(struct db_stmt *stmt, int col)
 {
 	PGresult *res = (PGresult*)stmt->inner_stmt;
-	be64 bin;
+	be32 bin;
 	size_t expected = sizeof(bin), actual = PQgetlength(res, stmt->row, col);
 
 	if (expected != actual)
@@ -192,7 +192,7 @@ static s64 db_postgres_column_int(struct db_stmt *stmt, int col)
 		    expected, actual);
 
 	memcpy(&bin, PQgetvalue(res, stmt->row, col), sizeof(bin));
-	return be64_to_cpu(bin);
+	return be32_to_cpu(bin);
 }
 
 static size_t db_postgres_column_bytes(struct db_stmt *stmt, int col)
