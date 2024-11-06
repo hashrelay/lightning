@@ -239,8 +239,7 @@ static struct migration dbmigrations[] = {
     /* Create next_pay_index variable (highest pay_index). */
     {SQL("INSERT INTO vars(name, val)"
 	 "  VALUES('next_pay_index', "
-	 "    CAST(COALESCE((SELECT MAX(pay_index)+1 FROM invoices WHERE state=1), 1) "
-	 "    AS VARCHAR)"
+	 "    COALESCE((SELECT MAX(pay_index)+1 FROM invoices WHERE state=1), 1) "
 	 "  );"),
      NULL},
     /* Create first_block field; initialize from channel id if any.
@@ -888,7 +887,7 @@ static struct migration dbmigrations[] = {
     {SQL("ALTER TABLE channel_htlcs ADD fail_immediate INTEGER DEFAULT 0"), NULL},
 
     /* Issue #4887: reset the payments.id sequence after the migration above. Since this is a SELECT statement that would otherwise fail, make it an INSERT into the `vars` table.*/
-    {SQL("/*PSQL*/INSERT INTO vars (name, intval) VALUES ('payment_id_reset', setval(pg_get_serial_sequence('payments', 'id'), CAST(COALESCE((SELECT MAX(id)+1 FROM payments), 1) AS VARCHAR)))"), NULL},
+    {SQL("/*PSQL*/INSERT INTO vars (name, intval) VALUES ('payment_id_reset', setval(pg_get_serial_sequence('payments', 'id'), COALESCE((SELECT MAX(id)+1 FROM payments), 1)))"), NULL},
 
     /* Issue #4901: Partial index speeds up startup on nodes with ~1000 channels.  */
     {&SQL("CREATE INDEX channel_htlcs_speedup_unresolved_idx"
