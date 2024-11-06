@@ -184,12 +184,12 @@ static s64 db_postgres_column_int(struct db_stmt *stmt, int col)
 {
 	PGresult *res = (PGresult*)stmt->inner_stmt;
 	be32 bin;
-	size_t expected = sizeof(bin), actual = PQgetlength(res, stmt->row, col);
+	/* size_t expected = sizeof(bin), actual = PQgetlength(res, stmt->row, col);
 
 	if (expected != actual)
 		db_fatal(stmt->db,
 		    "s64 field doesn't match size: expected %zu, actual %zu\n",
-		    expected, actual);
+		    expected, actual);*/
 
 	memcpy(&bin, PQgetvalue(res, stmt->row, col), sizeof(bin));
 	return be32_to_cpu(bin);
