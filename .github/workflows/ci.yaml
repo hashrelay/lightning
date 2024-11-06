@@ -58,13 +58,21 @@ jobs:
           # We're going to check BOLT quotes, so get the latest version
           git clone https://github.com/lightning/bolts.git ../${BOLTDIR}
       - name: Configure
-        run: ./configure --enable-debugbuild --enable-rust
+        run: |
+          . "$HOME/.cargo/env"
+          ./configure --enable-debugbuild --enable-rust
       - name: Check source
-        run: make check-source BASE_REF="origin/${{ github.base_ref }}"
+        run: |
+          . "$HOME/.cargo/env"
+          make check-source BASE_REF="origin/${{ github.base_ref }}"
       - name: Check Generated Files have been updated
-        run: make check-gen-updated
+        run: |
+          . "$HOME/.cargo/env"
+          make check-gen-updated
       - name: Check docs
-        run: make check-doc
+        run: |
+          . "$HOME/.cargo/env"
+          make check-doc
 
   compile:
     name: Compile CLN ${{ matrix.cfg }}
@@ -101,6 +109,7 @@ jobs:
           COMPAT: 1
           CFG: ${{ matrix.CFG }}
         run: |
+          . "$HOME/.cargo/env"
           set -e
           pip3 install --user pip wheel poetry
           poetry export -o requirements.txt --with dev --without-hashes
@@ -112,7 +121,9 @@ jobs:
           # Rename now so we don't clash
           mv testpack.tar.bz2 cln-${CFG}.tar.bz2
       - name: Check rust packages
-        run: cargo test --all
+        run: |
+          . "$HOME/.cargo/env"
+          cargo test --all
       - uses: actions/upload-artifact@v4
         with:
           name: cln-${{ matrix.CFG }}.tar.bz2
@@ -252,6 +263,7 @@ jobs:
           TEST_NETWORK: ${{ matrix.TEST_NETWORK }}
           LIGHTNINGD_POSTGRES_NO_VACUUM: 1
         run: |
+          . "$HOME/.cargo/env"
           env
           cat config.vars
           VALGRIND=0 poetry run pytest tests/ -vvv ${PYTEST_OPTS}

@@ -24,11 +24,15 @@ sudo apt-get -qq install --no-install-recommends --allow-unauthenticated -yy \
      libc6-dev-armhf-cross \
      libpq-dev \
      libprotobuf-c-dev \
+     libssl-dev \
+     libssl3 \
      libsqlite3-dev \
      libtool \
      libxml2-utils \
      locales \
      net-tools \
+     openssl \
+     pkg-config \
      postgresql \
      python-pkg-resources \
      python3 \
