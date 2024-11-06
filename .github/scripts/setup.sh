@@ -25,7 +25,6 @@ sudo apt-get -qq install --no-install-recommends --allow-unauthenticated -yy \
      libpq-dev \
      libprotobuf-c-dev \
      libssl-dev \
-     libssl3 \
      libsqlite3-dev \
      libtool \
      libxml2-utils \
